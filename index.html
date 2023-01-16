@@ -1,0 +1,200 @@
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="viewport" content="width=device-width">
+<style>
+
+body{
+    margin:0px;
+    padding: 0px;
+    background: #000;
+}
+div#Main,div#Menu{
+    width: fit-content;
+    height: auto;
+    margin: 10px;
+    padding: 4px;
+    border: 1px solid #fff;
+    border-radius: 5px;
+}
+td.key{
+    width: 48px;
+    height: 48px;
+    border: 1px solid #fff;
+    text-align: center;
+    border-radius: 5px;
+}
+
+td.key input{
+    text-align: center;
+    font-size: 20px;
+    width: 30px;
+    background: #333;
+    color: #fff;
+    border: 1px solid #fff;
+    border-radius: 5px;
+}
+td.key input.answer{
+    background: #f00;
+}
+
+textarea{
+    border: 1px solid #fff;
+    margin: 2px;
+    padding: 2px;
+    width: 30%;
+    height: 10%;
+    background: #333;
+    color: #fff;
+    border-radius: 5px;
+}
+span {
+    position: absolute;
+    border: 1px solid #fff;
+    padding: 2px;
+    margin: 2px;
+    width: 48px;
+    height: 48px;
+    font-size: 36px;
+    text-align: center;
+    color: #fff;
+    vertical-align: top;
+    border-radius: 5px;
+}
+input#Answer{
+    float: right;
+    border: 1px solid #fff;
+    width: 100px;
+    height: 48px;
+    text-align: center;
+    font-size: 36px;
+    margin: 2px;
+    padding: 2px;
+    background: #333;
+    border-radius: 5px;
+    color: #fff;
+}
+
+button{
+    cursor: pointer;
+}
+
+</style>
+
+<script>
+    /*
+    var vowel = `ㅏㅓㅗㅜㅡㅣㅐㅔㅚㅟ`;
+    var vowel2 = `ㅑㅕㅛㅠㅒㅖㅘㅝㅙㅞㅢ`;
+    var consonant = `ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅎ`;
+    var consonant2 = `ㅋㅌㅍㅊ`;
+    var consonant3 = `ㄲㄸㅃㅆㅉ`;
+    */
+
+    var memory = JSON.parse(localStorage.type_game||'{"1-8":"ㅑ","0-0":"`","0-1":"1","0-2":"2","0-3":"3","0-4":"4","0-5":"5","0-6":"6","0-7":"7","0-8":"8","0-9":"9","0-10":"0","0-11":"-","0-12":"=","1-1":"ㅂ","1-2":"ㅈ","1-3":"ㄷ","1-4":"ㄱ","1-5":"ㅅ","1-6":"ㅛ","1-7":"ㅕ","1-9":"ㅐ","1-10":"ㅔ","1-11":"[","1-12":"]","2-2":"ㅁ","2-3":"ㄴ","2-4":"ㅇ","2-5":"ㄹ","2-6":"ㅎ","2-7":"ㅗ","2-8":"ㅓ","2-9":"ㅏ","2-10":"ㅣ","2-11":";","2-12":"\'","3-3":"ㅋ","3-4":"ㅌ","3-5":"ㅊ","3-6":"ㅍ","3-7":"ㅠ","3-8":"ㅜ","3-9":"ㅡ","3-10":",","3-11":".","3-12":"/","rand":"ㅏㅓㅗㅜㅡㅣㅐㅔㅚㅟㅑㅕㅛㅠㅒㅖㅘㅝㅙㅞㅢㄱㄴㄷㄹㅁㅂㅅㅇㅈㅎㅋㅌㅍㅊㄲㄸㅃㅆㅉ"}');
+    
+    window.onload = ()=>{
+
+        var table = document.querySelector("table");
+        document.querySelector("textarea").innerHTML = memory.rand;
+
+        for(var h=0;h<=3;h++){
+
+            var tr = document.createElement("tr");
+            var td = ``;
+
+            for(var w=0;w<=12;w++){
+
+                var txt = `<input data-pos="${h}-${w}" type="text" value="${memory[`${h}-${w}`]||''}">`;
+                if(w<h) txt = ``;
+                td += `<td class="key">${txt}</td>`;
+            }
+
+            tr.innerHTML = td;
+
+            table.appendChild(tr);
+        }
+
+
+        document.querySelectorAll("input,textarea").forEach(o=>{
+
+            o.addEventListener("keyup",SetKey);
+            o.addEventListener("change",SetKey);
+
+        });
+
+
+        document.querySelector("#Question").innerHTML = memory.rand.substr( Math.floor(memory.rand.length * Math.random()) ,1);
+        document.querySelector("#Answer").focus();
+        document.querySelector("#Answer").addEventListener("keyup",Answer);
+
+        
+        CheckPos();
+
+        document.querySelector("#Default").addEventListener("click",()=>{
+            if(confirm("確定要初始化嗎?(回歸韓文模式)")===false) return;
+
+            delete localStorage.type_game;
+            location.reload();
+        });
+
+        
+    }
+
+
+    CheckPos = ()=>{
+
+        document.querySelectorAll("td.key").forEach(td => {
+
+            if(td.querySelector("input")===null) return;
+
+            td.querySelector("input").classList.remove("answer");
+
+            if( td.querySelector("input").value===document.querySelector("#Question").innerHTML ){
+
+                td.querySelector("input").classList.add("answer");
+
+            }
+
+        });
+    }
+
+    Answer = (e)=>{
+
+        var obj = e.target;
+
+        
+        if(e.key==='Enter')
+        if(obj.value===document.querySelector("#Question").innerHTML){
+            obj.value = '';
+            document.querySelector("#Question").innerHTML = memory.rand.substr( Math.floor(memory.rand.length * Math.random()) ,1);
+
+            CheckPos();
+        }
+        
+    }
+
+    SetKey = (e)=>{
+
+        var obj = e.target;
+        
+        memory[ obj.dataset.pos ] = obj.value;
+
+
+        localStorage.type_game = JSON.stringify(memory);
+    }
+    
+</script>
+
+
+<div id="Main">
+
+    <table>
+        
+    </table>
+    <textarea data-pos="rand"></textarea>
+    <span id="Question"></span>
+    <input type="text" id="Answer">
+
+</div>
+
+<div id="Menu">
+    <button id="Default">初始化</button>
+</div>
